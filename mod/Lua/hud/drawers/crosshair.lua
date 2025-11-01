@@ -2,37 +2,43 @@ local MID_X = BASEVIDWIDTH*FU / 2
 local MID_Y = BASEVIDHEIGHT*FU / 2
 local SCALE = FU
 local CRBASE_TRANS = V_10TRANS
-local CRTYPE_BASEONLY	= 0
-local CRTYPE_BLOCKED	= 1
-local CRTYPE_DIRECT		= 2
-local CRTYPE_STANDBY	= 3
-
+local CRTYPE_BASEONLY		= 0
+local CRTYPE_BLOCKED		= 1
+local CRTYPE_DIRECT			= 2
+local CRTYPE_STANDBY		= 3
+local CRTYPE_CHARGERBASE	= 4
 local function drawReticle(v,x,y, p, type)
 	local prefix = "PAINT_CR_"
-	/*
+	local wep = Paint.weapons[p.paint.weapon_id]
 	-- when brella-class loses its shield
-	if (true)
+	if (wep.guntype == WPT_BRELLA)
 		prefix = "PAINT_CROPEN_"
 	end
-	*/
+	
 	if type == CRTYPE_BASEONLY
 		v.drawScaled(x,y, FU/4, v.cachePatch(prefix.."BASE"), CRBASE_TRANS)
 	elseif type == CRTYPE_BLOCKED
 		v.drawScaled(x,y, FU/4, v.cachePatch("PAINT_CR_RET"), 0)
 		v.drawScaled(x,y, FU/4, v.cachePatch(prefix.."BLOCKED"), 0, v.getColormap(TC_DEFAULT, Paint:getPlayerColor(p)))
 	elseif type == CRTYPE_DIRECT
-		v.drawScaled(x,y, FU/4, v.cachePatch("PAINT_CR_HIT"), 0, v.getColormap(nil,Paint:getPlayerColor(p)))		
+		v.drawScaled(x,y, FU/4, v.cachePatch(wep.guntype == WPT_CHARGER and "PAINT_CR_CHIT" or "PAINT_CR_HIT"), 0, v.getColormap(nil,Paint:getPlayerColor(p)))		
 	elseif type == CRTYPE_STANDBY
 		v.drawScaled(x,y, FU/4, v.cachePatch("PAINT_CR_RET"))
 		v.drawScaled(x,y, FU/4, v.cachePatch(prefix.."BASE"), CRBASE_TRANS)
+	elseif type == CRTYPE_CHARGERBASE
+		v.drawScaled(x,y, FU/4, v.cachePatch(prefix.."CBASE"), V_50TRANS)
 	end
 end
 
 local d_raycast, r_raycast, dh_raycast, dh_raycast2 /*"Direct Hit"*/
-local function rangecaster(p,me,pt,cur_weapon, dualieflip)
+local function rangecaster(p,me,pt,cur_weapon, dualieflip, chargerdupe)
 	local workray = r_raycast
-	if (dualieflip)
+	if (dualieflip or chargerdupe)
 		workray = d_raycast
+	end
+	local range = cur_weapon:get(pt,"range")
+	if chargerdupe
+		range = cur_weapon.range
 	end
 	if not (workray and workray.valid)
 		local angle = p.cmd.angleturn << 16
@@ -54,8 +60,8 @@ local function rangecaster(p,me,pt,cur_weapon, dualieflip)
 			me.y + weaponoffset[2],
 			ray.z
 		)
-		P_InstaThrust(ray, angle, FixedMul(FixedDiv(cur_weapon:get(pt,"range"), cur_weapon:get(pt,"lifespan") * FU), ray.scale))
-		ray.finalpos = Paint:aimProjectile(p,ray, angle, p.aiming, false,nil, dualieflip, true)
+		P_InstaThrust(ray, angle, FixedMul(FixedDiv(range, cur_weapon:get(pt,"lifespan") * FU), ray.scale))
+		ray.finalpos = Paint:aimProjectile(p,ray, angle, p.aiming, false,nil, dualieflip, true, nil,nil, chargerdupe)
 		
 		ray.radius = FixedMul(mobjinfo[MT_PAINT_SHOT].radius, ray.scale)
 		ray.height = FixedMul(mobjinfo[MT_PAINT_SHOT].height, ray.scale)
@@ -63,7 +69,7 @@ local function rangecaster(p,me,pt,cur_weapon, dualieflip)
 		--ray.momx,ray.momy,ray.momz = $1/5, $2/5, $3/5
 		ray.sprite = SPR_NULL
 		
-		if (dualieflip)
+		if (dualieflip or chargerdupe)
 			d_raycast = ray
 		else
 			r_raycast = ray
@@ -72,9 +78,7 @@ local function rangecaster(p,me,pt,cur_weapon, dualieflip)
 	end
 	if (workray and workray.valid)
 		local ray = workray
-		local wep = Paint.weapons[ray.weapon_id]
-		
-		local range = FixedMul(wep:get(pt,"range"), ray.scale)
+		range = FixedMul($, ray.scale)
 		
 		for i = 0,25 do
 			for j = 0,5
@@ -224,6 +228,8 @@ addHook("PostThinkFrame",do
 	rangecaster(p,me,pt,cur_weapon, false)
 	if (cur_weapon.guntype == WPT_DUALIES)
 		rangecaster(p,me,pt,cur_weapon, true)
+	elseif (cur_weapon.guntype == WPT_CHARGER)
+		rangecaster(p,me,pt,cur_weapon, false, true)
 	end
 	
 	raycaster(p,me,pt,cur_weapon, false)
@@ -293,7 +299,7 @@ local function drawCrosshair(v,p,cam, y, dflip)
 	drawReticle(v, result.x,result.y, p, CRTYPE_BLOCKED)
 	return true
 end
-local function crosshairdrawer(v,p,cam, pt, dflip)
+local function crosshairdrawer(v,p,cam, pt, dflip, chargerdupe)
 	local wep = Paint.weapons[pt.weapon_id]
 	interptag = 0
 	
@@ -302,7 +308,7 @@ local function crosshairdrawer(v,p,cam, pt, dflip)
 	local y = MID_Y
 	local workray = r_raycast
 	local dh_workray = dh_raycast
-	if (dflip)
+	if (dflip or chargerdupe)
 		workray = d_raycast
 		dh_workray = dh_raycast2
 		interptag = 4
@@ -450,6 +456,13 @@ local function crosshairdrawer(v,p,cam, pt, dflip)
 	end
 	
 	--if cv_crosshair.value == 0 then return end
+	if chargerdupe
+		v.dointerp(6 + interptag)
+		drawReticle(v,MID_X,y, p, CRTYPE_CHARGERBASE)
+		v.dointerp(false)
+		return
+	end
+	
 	cross_x,cross_y = MID_X,y
 	local crosshair_result = drawCrosshair(v,p,cam, y, dflip)
 	if crosshair_result == -1 then return end
@@ -497,8 +510,10 @@ addHook("HUD",function(v,p,cam)
 	local wep = Paint.weapons[pt.weapon_id]
 	if wep == nil then return end
 	
-	crosshairdrawer(v,p,cam, pt, false)
+	crosshairdrawer(v,p,cam, pt, false, wep.guntype == WPT_CHARGER)
 	if (wep.guntype == WPT_DUALIES)
 		crosshairdrawer(v,p,cam, pt, true)
+	elseif (wep.guntype == WPT_CHARGER)
+		crosshairdrawer(v,p,cam, pt, false, false)
 	end
 end,"game")

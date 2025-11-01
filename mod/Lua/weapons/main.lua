@@ -220,7 +220,8 @@ end
 
 -- hsprd and vsprd arguments are offsets for spread values
 -- hsprd and vsprd are fixed_t
-function Paint:aimProjectile(p, proj, angle, aiming, dospread, mom_vec, dualieflip, crosshair, hsprd, vsprd)
+-- FUCK!!! I HATE THIS FUNCTION!! THIS FUCKTION!!
+function Paint:aimProjectile(p, proj, angle, aiming, dospread, mom_vec, dualieflip, crosshair, hsprd, vsprd, chargerdupe)
 	local me = p.mo
 	local pt = p.paint
 	local weap = self.weapons[pt.weapon_id]
@@ -237,7 +238,7 @@ function Paint:aimProjectile(p, proj, angle, aiming, dospread, mom_vec, dualiefl
 	local handoffset  = {Paint:getWeaponOffset(me,angle - ANGLE_90, weap, dualieflip, true)}
 	handoffset[4], handoffset[5] = handoffset[1], handoffset[2]
 	
-	local range = FixedMul(weap:get(pt,"range"), me.scale)
+	local range = FixedMul(chargerdupe and (weap.range) or (weap:get(pt,"range")), me.scale)
 	local aimvec = P_Vec3.SphereToCartesian(angle,aiming)
 	
 	-- Aim in the center (but offset)

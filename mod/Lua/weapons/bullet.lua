@@ -388,6 +388,7 @@ addHook("MobjThinker",function(shot)
 			for j = 0,3
 				if P_RailThinker(shot) then return; end
 				local g = P_SpawnGhostMobj(shot)
+				P_SetOrigin(g,g.x,g.y,g.z)
 				g.blendmode = AST_ADD
 				g.destscale = 0
 				if (count % 3 == 0)

@@ -23,8 +23,8 @@ sfxinfo[freeslot("sfx_p_s4_7")].caption = "Dualies split"
 Paint:registerWeapon({
 	name = "dualies",
 	handoffset = 5*FU,
-	h_spread = {4, 4},
-	v_spread = {3, 3},
+	h_spread = {6, 6},
+	v_spread = {4, 4},
 	damage = 25*FU,
 	guntype = WPT_DUALIES,
 	lifespan = 4,

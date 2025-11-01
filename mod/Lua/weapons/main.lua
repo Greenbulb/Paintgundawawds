@@ -275,10 +275,11 @@ function Paint:aimProjectile(p, proj, angle, aiming, dospread, mom_vec, dualiefl
 			v_spread = 0
 		end
 		
-		h_spread = $ + (pt.spreadadd * sign(h_spread))
+		local random = P_RandomFixedSigned()
+		h_spread = $ + FixedMul(pt.spreadadd, random)
 		h_spread = FixedAngle($)
 		v_spread = FixedAngle($)
-
+		
 		--angle = $ - h_spread
 		--aiming = $ + FixedAngle(v_spread)
 	end

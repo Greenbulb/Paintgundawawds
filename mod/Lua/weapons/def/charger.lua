@@ -26,6 +26,7 @@ Paint:registerWeapon({
 	
 	weaponstate = S_PAINT_GUN_CHARGER,
 	abilitywrap = Paint.wtemplate_charger,
+	soundvolume = 255,
 	/*
 	sounds = {
 		sfx_p_s1_0, sfx_p_s1_1, sfx_p_s1_2, sfx_p_s1_3, sfx_p_s1_4, sfx_p_s1_5, sfx_p_s1_6

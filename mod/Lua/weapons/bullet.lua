@@ -1,6 +1,15 @@
 local CV = Paint.CV
 
-freeslot("MT_PAINT_SHOT", "S_PAINT_SHOT", "S_PAINT_SHOT_BIG", "SPR_PAINT_SHOT", "SPR_PAINT_MISC")
+freeslot(
+	"MT_PAINT_SHOT",
+	"SPR_PAINT_SHOT",
+	
+	"S_PAINT_SHOT",
+	"S_PAINT_SHOT_BIG", 
+	"S_PAINT_SHOT_PELLET",
+	
+	"SPR_PAINT_MISC"
+)
 states[S_PAINT_SHOT] = {
 	sprite = SPR_PAINT_SHOT,
 	frame = 0,
@@ -12,6 +21,12 @@ states[S_PAINT_SHOT_BIG] = {
 	frame = 1|FF_FULLBRIGHT,
 	tics = -1,
 	nextstate = S_PAINT_SHOT_BIG
+}
+states[S_PAINT_SHOT_PELLET] = {
+	sprite = SPR_PAINT_SHOT,
+	frame = 3|FF_FULLBRIGHT,
+	tics = -1,
+	nextstate = S_PAINT_SHOT_PELLET
 }
 mobjinfo[MT_PAINT_SHOT] = {
 	doomednum = -1,

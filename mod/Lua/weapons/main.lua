@@ -4,7 +4,7 @@ for i = 0,6
 	sfxinfo[freeslot("sfx_p_s0_"..i)].caption = "Paint fired"
 end
 --im so sorry most of these sounds are wav but im lazy so pls forgive me
-for i = 0,6
+for i = 0,6 -- this is for the charger
 	sfxinfo[freeslot("sfx_p_s2_"..i)].caption = "Paint fired"
 end
 for i = 0,3
@@ -14,7 +14,7 @@ end
 sfxinfo[sfx_p_s2_0].caption = "/"
 sfxinfo[sfx_p_s2_3].caption = "/"
 sfxinfo[sfx_p_s2_1].flags = SF_X2AWAYSOUND
-sfxinfo[sfx_p_s2_2].flags = SF_X2AWAYSOUND
+sfxinfo[sfx_p_s2_2].flags = SF_X2AWAYSOUND|SF_X4AWAYSOUND
 
 sfxinfo[freeslot("sfx_pt_dge")].caption = "Dodge roll"
 
@@ -370,6 +370,7 @@ function Paint:fireWeapon(p, cur_weapon, angle, aiming, dospread, doaiming, hspr
 		cur_weapon.shottype
 	)
 	proj.target = me
+	proj.mirrored = P_RandomChance(FU/2)
 	proj.weapon_id = pt.weapon_id
 	proj.color = Paint:getPlayerColor(p)
 	proj.lifespan = 0

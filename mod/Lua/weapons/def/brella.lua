@@ -7,8 +7,10 @@ Paint:registerWeapon({
 	name = "brella",
 	handoffset = 8*FU,
 	range = 355 * FU,
+	dropoff = 310*FU,
 	h_spread = {8, 8},
 	v_spread = {6, 6},
+	falloff = {5,5},
 	maxdamage = 16*FU + (FU/5),
 	damage = MIN_DAMAGE,
 	guntype = WPT_BRELLA,
@@ -16,12 +18,14 @@ Paint:registerWeapon({
 	shootspeed = tofixed("0.45"),
 	inkcost = tofixed("6.325"),
 	inkdelay = TR,
+	dragmul = FU*58/100,
 	
 	startlag = 5,
 	endlag = 12,
 	
 	weaponstate = S_PAINT_GUN,
 	weaponstate_scale = FU/2,
+	shotstate = S_PAINT_SHOT_PELLET,
 	
 	-- brellas dont have jump spread
 	spread_jumpspread = 0,
